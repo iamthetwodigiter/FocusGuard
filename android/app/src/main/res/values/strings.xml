@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_description">FocusGuard monitors which apps you open and blocks distracting apps when a focus session is active. This helps you stay productive by preventing access to selected apps.</string>
+</resources>

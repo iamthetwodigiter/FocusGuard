@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/block_overlay_bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <!-- Icon Container -->
+    <FrameLayout
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_marginBottom="40dp"
+        android:background="@drawable/block_icon_bg"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="🛡️"
+            android:textSize="64sp" />
+    </FrameLayout>
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Focus Mode Active"
+        android:textColor="#F8FAFC"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:letterSpacing="-0.02"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Subtitle / Warning -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PROTECTED SESSION"
+        android:textColor="#6366F1"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.2"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Message Body -->
+    <TextView
+        android:id="@+id/block_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="This application is temporarily restricted to help you stay in the flow.\n\nYou're doing great!"
+        android:textAlignment="center"
+        android:textColor="#94A3B8"
+        android:textSize="16sp"
+        android:lineSpacingExtra="6dp"
+        android:layout_marginBottom="48dp"
+        android:maxWidth="280dp" />
+
+    <!-- Action Button -->
+    <Button
+        android:id="@+id/ok_button"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:text="RESUME FOCUS"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/block_button_bg"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"
+        android:stateListAnimator="@null"
+        android:elevation="0dp" />
+
+    <!-- Version Footer (Optional but adds to the look) -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="FocusGuard Shield"
+        android:textColor="#94A3B8"
+        android:alpha="0.4"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1" />
+
+</LinearLayout>
