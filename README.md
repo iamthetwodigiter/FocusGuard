@@ -1,137 +1,92 @@
 # FocusGuard — The Ultimate Focus Shield
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-v3.11.0+-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter">
+  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android">
+  <img src="https://img.shields.io/badge/Architecture-MVVM-FF6F00?style=for-the-badge" alt="MVVM">
+</p>
+
 **"A premium, high-performance focus shield built with Flutter, featuring advanced app/web blocking and a sleek midnight aesthetic for deep productivity."**
 
 FocusGuard is a sophisticated productivity tool designed to help you reclaim your time and achieve peak flow state. It combines robust system-level blocking with a stunning, glassmorphic UI.
 
-## Architecture: MVVM
-This project follows a strict **MVVM (Model-View-ViewModel)** architecture using **Riverpod** for state management. 
-- **Models**: Plain data classes and Hive objects for persistence.
-- **Views**: Declarative UI components that react to state changes.
-- **ViewModels (Notifiers)**: Business logic and state management, isolated from the UI.
-- **Repositories**: Abstracted data access layers for both local (Hive) and native bridge interactions.
+---
 
-## Features
+## Visionary Features
 
-### Core Productivity
-- **🛡️ Elite App Blocking**: System-level interruption of distracting applications.
-- **🌐 Web Shield**: Block specific websites across all major Android browsers.
-- **⏱️ Deep Work Sessions**: Configurable focus periods with real-time countdowns.
-- **🎯 Session Presets**: Rapid-start presets for 15, 25, 45, or 90-minute sprints.
+### Elite App Blocking
+System-level interruption of distracting applications. Select exactly which apps are off-limits during your deep work sessions with high-precision monitoring.
 
-### Dashboard
-- Main focus screen with session control
-- Real-time blocked apps counter
-- Quick preset duration selector
-- Service status indicator
+### Web & Domain Shield
+Block specific websites across all major Android browsers. Maintain focus by eliminating web-based distractions at the DNS/browser level.
 
-### Statistics Screen
-- Weekly focus time visualization
-- Most blocked apps statistics
-- Achievement tracking
-- Productivity graphs
+### Pro Focus Sessions
+- **Deep Work Modes**: Configurable focus periods with real-time countdowns.
+- **Session Presets**: Liquid-fast presets for 15, 25, 45, or 90-minute sprints.
+- **Micro-Animations**: Experience a responsive UI that feels alive and rewarding.
 
-### Advanced Settings
-- Drawer menu with additional features
-- Quick access to whitelist management
-- Scheduled focus session editor
-- Help and about sections
+### Analytics & Insights
+- **Statistics Dashboard**: Weekly focus time visualization and daily trends using beautiful, interactive charts.
+- **Session History**: Detailed logs of every focus sprint to track your long-term progress.
+- **Usage Stats**: Data-driven insights into which apps attempt to steal your attention.
 
-## Getting Started
+### Advanced Scheduling
+Automate your productivity with recurring rules. Set your deep-work windows once and let FocusGuard handle the transition into focus mode automatically.
 
-### Prerequisites
-- Flutter 3.11.0 or higher
-- Android device or emulator
-- Android SDK 21 or higher
+### Achievement System
+Stay motivated by unlocking premium badges and hitting focus milestones. Turn your productivity journey into a rewarding progression system.
 
-### Installation
+### Premium Midnight UI
+- **Glassmorphism**: A state-of-the-art aesthetic using subtle transparencies and blurs.
+- **Dark Mode Optimized**: Designed to reduce eye strain and look stunning on OLED displays.
+- **Trusted Apps**: Whitelist essential tools (like Music or Notes) while keeping distractions locked away.
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/iamthetwodigiter/FocusGuard.git
-   cd FocusGuard
-   ```
+---
 
-2. **Install dependencies**
-   ```bash
-   flutter pub get
-   ```
+## One-Click Installation
 
-3. **Build and run**
-   ```bash
-   flutter run
-   ```
+We provide automated scripts that handle all the technical details, including ADB setup and architecture-specific selection.
 
-## Configuration
+### Windows, Linux, & macOS
+Download the latest codebase and run our smart installers:
 
-### Required Permissions
-The app requires the following permissions:
-- **Accessibility Service**: For app monitoring and blocking
-- **Overlay Permission**: To display blocking overlays
-- **Settings Access**: To manage device settings
+| Platform | Command | Key Features |
+| :--- | :--- | :--- |
+| **Linux/macOS** | `bash install-app.sh` | Auto-ADB detection, GitHub Release fetching, Architecture selection |
+| **Windows** | `Double-click install-app.bat` | PowerShell-driven automation, Auto-download for Platform Tools |
 
-### Setup Steps
+---
 
-1. **Enable Accessibility Service**
-   - Go to Settings > Accessibility
-   - Find "FocusGuard" and enable it
-   - Grant all requested permissions
+### Direct Download (APK)
+Prefer more control? Download the APK directly from our official portal:
+**[thetwodigiter.app](https://www.thetwodigiter.app)**
 
-2. **Grant Overlay Permission**
-   - Go to Settings > Apps > Special app access > Display over other apps
-   - Enable "FocusGuard"
+---
 
-3. **Select Apps to Block**
-   - Open FocusGuard
-   - Go to "Block Apps" tab
-   - Toggle apps you want to block
+## Bypassing "Play Protect" Guide
 
-4. **Create Focus Sessions**
-   - Select focus duration (15, 25, 45, or 90 minutes)
-   - Tap "Start Focus Session"
-   - Selected apps will be blocked until session ends
+Since FocusGuard uses powerful **Accessibility Services** to monitor and block apps, Google Play Protect might flag the sideloaded APK. This is normal behavior for advanced system-level productivity tools.
 
-## UI/UX Improvements
+**Watch the visual guide below for a seamless installation:**
 
-### Design System
-- **Color Palette**: Modern purple, green, and blue accents
-- **Typography**: Clear hierarchy with bold headers
-- **Spacing**: Generous padding for readability
-- **Shadows**: Subtle depth with consistent elevation
+![Play Protect Bypass Guide](assets/play_protect_bypass.gif)
 
-### Components
-- **Gradient Cards**: Eye-catching gradient backgrounds
-- **Status Indicators**: Clear visual feedback
-- **Animated Buttons**: Smooth press feedback
-- **Info Banners**: Clear instructional messages
+> [!IMPORTANT]
+> FocusGuard values your privacy. The Accessibility Service is used **locally** on your device solely to detect when a blocked app is in the foreground. No usage data ever leaves your device.
 
-### Navigation
-- **Bottom Navigation**: Quick access to main features
-- **Drawer Menu**: Advanced features and settings
-- **Smooth Transitions**: Elegant screen transitions
+---
 
-## Advanced Features Guide
+## Architecture & Tech Stack
 
-### Using Trusted Apps
-1. Open the drawer menu
-2. Select "Trusted Apps"
-3. Toggle apps to allow during focus
-4. These apps won't be blocked even in focus sessions
+FocusGuard is engineered with scalability and performance in mind:
 
-### Setting Up Schedules
-1. Open the drawer menu
-2. Select "Scheduled Focus"
-3. Create a new rule by setting:
-   - Rule name
-   - Start and end times
-   - Days of the week
-4. Enable the rule to activate automatic focus sessions
+- **State Management**: [Riverpod](https://riverpod.dev) (Strict MVVM pattern)
+- **Local Persistence**: [Hive](https://pub.dev/packages/hive) (High-performance NoSQL)
+- **Navigation**: [GoRouter](https://pub.dev/packages/go_router) (Declarative routing)
+- **Animations**: [Lottie](https://pub.dev/packages/lottie) & Flutter internal Animation controllers
+- **Background Engine**: Custom Native Bridge (Kotlin) with Flutter Background Service
 
-### Reading Statistics
-- **Weekly Chart**: Shows daily focus time trends
-- **App Blocking Stats**: Displays most-blocked apps
-- **Achievements**: Earn badges for focus streaks
-- **Total Stats**: Overall focus statistics
+---
 
 ## Development
 
@@ -139,67 +94,22 @@ The app requires the following permissions:
 ```
 focusguard/
 ├── lib/
-│   ├── core/
-│   │   ├── router/          # Navigation routing
-│   │   ├── theme/           # App theming
-│   │   ├── constants/       # App constants
-│   │   └── widgets/         # Reusable widgets
+│   ├── core/                # Routing, Theming, Widgets
 │   ├── features/
-│   │   ├── dashboard/       # Main dashboard
-│   │   ├── focus_session/   # Focus feature
-│   │   ├── app_selection/   # App blocking
-│   │   ├── website_blocking/# Website blocking
-│   │   ├── statistics/      # Analytics
-│   │   ├── whitelist/       # Trusted apps
-│   │   └── scheduling/      # Time-based rules
-│   ├── services/            # Native services
-│   └── main.dart           # App entry
-├── android/                 # Android native code
-├── pubspec.yaml            # Dependencies
-└── README.md              # This file
+│   │   ├── achievements/    # Gamification engine
+│   │   ├── dashboard/       # Main control center
+│   │   ├── focus_session/   # Real-time session logic
+│   │   ├── scheduling/      # Recurrence engine
+│   │   ├── statistics/      # Data visualization
+│   │   └── website_blocking/# Web monitor
+│   ├── services/            # Native bridges & background services
+│   └── main.dart            # App entry
 ```
 
-### Dependencies
-- **flutter_riverpod**: State management
-- **go_router**: Navigation
-- **hive_flutter**: Local storage
-- **shared_preferences**: Settings storage
-- **flutter_background_service**: Background tasks
-- **installed_apps**: Installed apps listing
-
-### Building for Production
-
+### Build for Production
 ```bash
-# Build APK
-flutter build apk
-
-# Build AAB (for Play Store)
-flutter build appbundle
-
-# Release build
 flutter build apk --release
 ```
-
-## Troubleshooting
-
-### Common Issues
-
-**App blocking not working?**
-- Ensure accessibility service is enabled
-- Grant overlay permission
-- Add apps to the blocklist
-- Check device battery optimization settings
-
-**Focus session won't start?**
-- Verify at least one app is blocked
-- Check service status in main screen
-- Ensure permissions are granted
-- Try restarting the app
-
-**Statistics not showing?**
-- Statistics are mock data for now
-- Real stats will be collected in future versions
-- Check your focus session history
 
 ---
 
@@ -208,8 +118,8 @@ flutter build apk --release
 Developed with passion by **thetwodigiter**. 
 
 Check out more of my work and projects at my portfolio:
-👉 **[thetwodigiter.app](https://www.thetwodigiter.app)**
+**[thetwodigiter.app](https://www.thetwodigiter.app)**
 
 ---
 
-**Made with ❤️ to help you stay focused and productive.**
+**Made with ❤️ to help you stay focused and achieve peak productivity.**
