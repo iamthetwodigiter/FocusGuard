@@ -1,7 +1,7 @@
 # FocusGuard — The Ultimate Focus Shield
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Flutter-v3.11.0+-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter">
+  <img src="https://img.shields.io/badge/Flutter-v3.11.0-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter">
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android">
   <img src="https://img.shields.io/badge/Architecture-MVVM-FF6F00?style=for-the-badge" alt="MVVM">
 </p>
@@ -69,9 +69,9 @@ Since FocusGuard uses powerful **Accessibility Services** to monitor and block a
 
 **Watch the visual guide below for a seamless installation:**
 
-![Play Protect Bypass Guide](assets/play_protect_bypass.gif)
+![Play Protect Bypass Guide](assets/installation_guide.gif)
 
-> [!IMPORTANT]
+> [IMPORTANT]
 > FocusGuard values your privacy. The Accessibility Service is used **locally** on your device solely to detect when a blocked app is in the foreground. No usage data ever leaves your device.
 
 ---
