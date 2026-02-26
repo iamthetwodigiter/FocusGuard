@@ -21,13 +21,14 @@ class AppInfoAdapter extends TypeAdapter<AppInfo> {
       appName: fields[1] as String,
       icon: (fields[2] as List?)?.cast<int>(),
       isBlocked: fields[3] as bool,
+      isSystemApp: fields[4] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppInfo obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.packageName)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class AppInfoAdapter extends TypeAdapter<AppInfo> {
       ..writeByte(2)
       ..write(obj.icon)
       ..writeByte(3)
-      ..write(obj.isBlocked);
+      ..write(obj.isBlocked)
+      ..writeByte(4)
+      ..write(obj.isSystemApp);
   }
 
   @override
