@@ -88,7 +88,7 @@ Download the latest codebase and run our smart installers:
    - Select your architecture (arm64-v8a is recommended for most modern devices).
    - The script will automatically detect your device and install the app.
 
-## _You can also download the installer from the [Releases](https://github.com/iamthetwodigiter/FocusGuard/releases) page._
+# _If you don't want to clone the entire repo, you can also download the installer from the [Releases](https://github.com/iamthetwodigiter/FocusGuard/releases) page._
 
 ### Direct Download (APK)
 Prefer more control? Download the APK directly from our official portal:
