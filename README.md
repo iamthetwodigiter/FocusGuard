@@ -55,7 +55,40 @@ Download the latest codebase and run our smart installers:
 | **Linux/macOS** | `bash install-app.sh` | Auto-ADB detection, GitHub Release fetching, Architecture selection |
 | **Windows** | `Double-click install-app.bat` | PowerShell-driven automation, Auto-download for Platform Tools |
 
----
+## Installation
+
+### Windows
+
+1. **Download the script**:
+   - Click the green **<> Code** button above.
+   - Select **Download ZIP**.
+   - Extract the ZIP file to a folder.
+
+2. **Run the installer**:
+   - Open the extracted folder.
+   - Double-click **install-app.bat**.
+   - Follow the on-screen instructions.
+
+### Linux / macOS
+
+1. **Download the script**:
+   ```bash
+   curl -L -o install-app.sh https://github.com/thetwodigiter/focusguard/archive/refs/heads/main.zip
+   ```
+
+2. **Make it executable**:
+   ```bash
+   chmod +x install-app.sh
+   ```
+
+3. **Run the installer**:
+   ```bash
+   ./install-app.sh
+   ```
+   - Select your architecture (arm64-v8a is recommended for most modern devices).
+   - The script will automatically detect your device and install the app.
+
+## _You can also download the installer from the [Releases](https://github.com/iamthetwodigiter/FocusGuard/releases) page._
 
 ### Direct Download (APK)
 Prefer more control? Download the APK directly from our official portal:
