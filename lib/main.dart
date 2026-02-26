@@ -63,20 +63,23 @@ Future<void> _syncDataToNative() async {
       if (hasWebsites) {
         debugPrint('   Found websites in blocklist, syncing browsers...');
         // Browser packages list
-        const browsers = [
-          'com.android.chrome',
-          'org.mozilla.firefox',
-          'com.microsoft.emmx',
-          'com.brave.browser',
-          'com.opera.browser',
-          'com.UCMobile.intl',
-          'com.duckduckgo.mobile.android',
-          'com.kiwibrowser.browser',
-          'com.vivaldi.browser',
-          'mark.via.gp',
-          'com.sec.android.app.sbrowser',
-          'org.chromium.chrome',
-          'com.opera.mini.native',
+        final browsers = [
+          'com.android.chrome',              // Chrome
+          'org.mozilla.firefox',             // Firefox
+          'com.opera.browser',               // Opera
+          'com.opera.mini.native',           // Opera Mini
+          'com.microsoft.emmx',              // Edge
+          'com.brave.browser',               // Brave
+          'com.duckduckgo.mobile.android',   // DuckDuckGo
+          'org.chromium.chrome',             // Chromium
+          'com.UCMobile.intl',               // UC Browser
+          'com.kiwibrowser.browser',         // Kiwi Browser
+          'com.vivaldi.browser',             // Vivaldi
+          'com.samsung.android.app.sbrowser',// Samsung Internet
+          'com.sec.android.app.sbrowser',    // Samsung Internet (alternative)
+          'mark.via.gp',                     // Via Browser
+          'com.yandex.browser',              // Yandex Browser
+          'com.android.browser',             // AOSP Browser
         ];
         await AndroidServiceBridge.syncBlockedBrowsers(browsers);
       }

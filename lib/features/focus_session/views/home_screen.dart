@@ -4,6 +4,7 @@ import 'package:focusguard/core/theme/app_theme.dart';
 import 'package:focusguard/features/focus_session/models/focus_session_state.dart';
 import '../../../services/native_bridge/android_service_bridge.dart';
 import '../../app_selection/viewmodels/app_selection_viewmodel.dart';
+import '../../website_blocking/viewmodels/website_blocking_viewmodel.dart';
 import '../viewmodels/focus_session_viewmodel.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -91,6 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       loading: () => 0,
       error: (_, _) => 0,
     );
+    final blockedWebsitesCount = ref.watch(blockedWebsitesCountProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -123,7 +125,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   const SizedBox(height: 32),
                   _buildPermissionPrompts(sessionState, sessionNotifier),
                   const SizedBox(height: 40),
-                  _buildFocusOrb(sessionState, sessionNotifier, blockedCount),
+                  _buildFocusOrb(sessionState, sessionNotifier, blockedCount, blockedWebsitesCount),
                   const SizedBox(height: 60),
                   if (!sessionState.isSessionActive)
                     _buildDurationPicker(sessionState, sessionNotifier),
@@ -306,15 +308,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     FocusSessionState sessionState,
     FocusSessionViewModel sessionNotifier,
     int blockedCount,
+    int blockedWebsitesCount,
   ) {
     const accent = AppColors.accent;
     const secondary = AppColors.accentSecondary;
 
     return GestureDetector(
       onTap: () {
-        if (blockedCount == 0 && !sessionState.isSessionActive) {
+        if (blockedCount == 0 && blockedWebsitesCount == 0 && !sessionState.isSessionActive) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please block some apps first!')),
+            const SnackBar(content: Text('Please block some apps or websites first!')),
           );
           return;
         }

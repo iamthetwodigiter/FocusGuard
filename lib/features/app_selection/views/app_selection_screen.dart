@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodels/app_selection_viewmodel.dart';
 import '../models/app_info.dart';
+import '../../settings/viewmodels/settings_viewmodel.dart';
 import 'package:focusguard/core/theme/app_theme.dart';
 
 class AppSelectionScreen extends ConsumerStatefulWidget {
@@ -260,8 +261,42 @@ class _AppSelectionScreenState extends ConsumerState<AppSelectionScreen> {
           value: isBlocked,
           activeThumbColor: AppColors.accent,
           activeTrackColor: AppColors.accent.withValues(alpha: 0.5),
-          onChanged: (_) => ref.read(appSelectionViewModelProvider.notifier).toggleAppBlock(app.packageName),
+          onChanged: (val) {
+            final isShieldActive = ref.read(settingsProvider)['systemAppShield'] ?? true;
+            if (isShieldActive && app.isSystemApp) {
+               _showShieldWarning(context);
+               return;
+            }
+            ref.read(appSelectionViewModelProvider.notifier).toggleAppBlock(app.packageName);
+          },
         ),
+      ),
+    );
+  }
+
+  void _showShieldWarning(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        title: const Row(
+          children: [
+            Icon(Icons.shield_rounded, color: AppColors.success),
+            SizedBox(width: 12),
+            Text('Shield Active', style: TextStyle(color: AppColors.text, fontWeight: FontWeight.w800)),
+          ],
+        ),
+        content: const Text(
+          'System App Shield is currently active. Core components are protected and cannot be modified.',
+          style: TextStyle(color: AppColors.textDim),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Understood', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }

@@ -59,47 +59,54 @@ class FocusSessionViewModel extends StateNotifier<FocusSessionState> {
     // Status will be re-checked when app resumes via didChangeAppLifecycleState in View
   }
 
+  Future<void> startSession(int durationMinutes) async {
+    if (state.isSessionActive) return;
+
+    if (!state.isServiceEnabled || !state.hasOverlayPermission) {
+      checkPermissions();
+      return;
+    }
+
+    await AndroidServiceBridge.activateFocusSession(true);
+    
+    _sessionStartTime = DateTime.now();
+    _remainingSeconds = durationMinutes * 60;
+    _startTimer();
+    await AndroidServiceBridge.setScreenshotBlocking(true);
+    
+    state = state.copyWith(isSessionActive: true);
+  }
+
+  Future<void> stopSession() async {
+    if (!state.isSessionActive) return;
+
+    await AndroidServiceBridge.activateFocusSession(false);
+    _stopTimer();
+
+    if (_sessionStartTime != null) {
+      final blockedApps = _ref.read(blockedAppsProvider).value ?? [];
+      final session = FocusSession(
+        sessionId: DateTime.now().millisecondsSinceEpoch.toString(),
+        startTime: _sessionStartTime!,
+        endTime: DateTime.now(),
+        durationMinutes: DateTime.now().difference(_sessionStartTime!).inMinutes,
+        blockedAppsCount: blockedApps.length,
+        blockedAppsPackages: blockedApps.map((a) => a.packageName).toList(),
+        completed: true,
+      );
+      await _ref.read(sessionHistoryProvider.notifier).addSession(session);
+      _sessionStartTime = null;
+    }
+    await AndroidServiceBridge.setScreenshotBlocking(false);
+    state = state.copyWith(isSessionActive: false);
+  }
+
   Future<void> toggleSession(int durationMinutes) async {
-    final newState = !state.isSessionActive;
-
-    if (!state.isServiceEnabled) {
-      // Logic for showing dialog should remain in View or be triggered via a stream/event
-      // For now, we just update state and let View handle the dialog if needed
-      return;
-    }
-
-    if (!state.hasOverlayPermission) {
-      await requestOverlayPermission();
-      return;
-    }
-
-    await AndroidServiceBridge.activateFocusSession(newState);
-
-    if (newState) {
-      _sessionStartTime = DateTime.now();
-      _remainingSeconds = durationMinutes * 60;
-      _startTimer();
-      await AndroidServiceBridge.setScreenshotBlocking(true);
+    if (state.isSessionActive) {
+      await stopSession();
     } else {
-      _stopTimer();
-      if (_sessionStartTime != null) {
-        final blockedApps = _ref.read(blockedAppsProvider).value ?? [];
-        final session = FocusSession(
-          sessionId: DateTime.now().millisecondsSinceEpoch.toString(),
-          startTime: _sessionStartTime!,
-          endTime: DateTime.now(),
-          durationMinutes: DateTime.now().difference(_sessionStartTime!).inMinutes,
-          blockedAppsCount: blockedApps.length,
-          blockedAppsPackages: blockedApps.map((a) => a.packageName).toList(),
-          completed: true,
-        );
-        await _ref.read(sessionHistoryProvider.notifier).addSession(session);
-        _sessionStartTime = null;
-      }
-      await AndroidServiceBridge.setScreenshotBlocking(false);
+      await startSession(durationMinutes);
     }
-
-    state = state.copyWith(isSessionActive: newState);
   }
 
   void _startTimer() {

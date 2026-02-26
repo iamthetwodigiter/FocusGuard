@@ -71,7 +71,7 @@ class _WebsiteBlockingScreenState extends ConsumerState<WebsiteBlockingScreen> {
         ],
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80), // Avoid overlap with dashboard bottom bar
+        padding: const EdgeInsets.only(bottom: 90),
         child: _buildFAB(),
       ),
     );

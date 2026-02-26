@@ -17,11 +17,15 @@ class AppInfo {
   @HiveField(3)
   final bool isBlocked;
 
+  @HiveField(4)
+  final bool isSystemApp;
+
   AppInfo({
     required this.packageName,
     required this.appName,
     this.icon,
     this.isBlocked = false,
+    this.isSystemApp = false,
   });
 
   AppInfo copyWith({
@@ -29,12 +33,14 @@ class AppInfo {
     String? appName,
     List<int>? icon,
     bool? isBlocked,
+    bool? isSystemApp,
   }) {
     return AppInfo(
       packageName: packageName ?? this.packageName,
       appName: appName ?? this.appName,
       icon: icon ?? this.icon,
       isBlocked: isBlocked ?? this.isBlocked,
+      isSystemApp: isSystemApp ?? this.isSystemApp,
     );
   }
 }

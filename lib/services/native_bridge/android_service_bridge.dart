@@ -53,6 +53,13 @@ class AndroidServiceBridge {
     logger.log('   ✅ Verification - read back: $saved');
   }
 
+  /// Save blocked website URLs list to SharedPreferences for native access
+  static Future<void> syncBlockedWebsites(List<String> urls) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = jsonEncode(urls);
+    await prefs.setString(AppConstants.nativeBlockedWebsitesKey, jsonString);
+  }
+
   /// Start the accessibility service
   static Future<bool> startAccessibilityService() async {
     try {
@@ -175,6 +182,15 @@ class AndroidServiceBridge {
       });
     } catch (e) {
       debugPrint('Error setting screenshot blocking: $e');
+    }
+  }
+
+  /// Completely exit the app and stop services
+  static Future<void> exitApp() async {
+    try {
+      await _channel.invokeMethod('exitApp');
+    } catch (e) {
+      debugPrint('Error exiting app: $e');
     }
   }
 }

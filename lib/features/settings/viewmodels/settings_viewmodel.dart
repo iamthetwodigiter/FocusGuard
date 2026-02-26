@@ -8,7 +8,7 @@ class SettingsNotifier extends StateNotifier<Map<String, dynamic>> {
           'notificationEnabled': true,
           'soundEnabled': true,
           'vibrationEnabled': true,
-          'blockSystemApps': false,
+          'systemAppShield': true,
           'allowScreenshots': false,
           'theme': 'system',
         }) {
@@ -21,7 +21,7 @@ class SettingsNotifier extends StateNotifier<Map<String, dynamic>> {
       'notificationEnabled': prefs.getBool('notificationEnabled') ?? true,
       'soundEnabled': prefs.getBool('soundEnabled') ?? true,
       'vibrationEnabled': prefs.getBool('vibrationEnabled') ?? true,
-      'blockSystemApps': prefs.getBool('blockSystemApps') ?? false,
+      'systemAppShield': prefs.getBool('systemAppShield') ?? true,
       'allowScreenshots': prefs.getBool('allowScreenshots') ?? false,
       'theme': prefs.getString('theme') ?? 'system',
     };
@@ -54,7 +54,7 @@ class SettingsNotifier extends StateNotifier<Map<String, dynamic>> {
       'notificationEnabled': true,
       'soundEnabled': true,
       'vibrationEnabled': true,
-      'blockSystemApps': false,
+      'systemAppShield': true,
       'allowScreenshots': false,
       'theme': 'system',
     };

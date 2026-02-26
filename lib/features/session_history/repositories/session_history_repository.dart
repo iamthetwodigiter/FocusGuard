@@ -79,11 +79,12 @@ class SessionHistoryRepository {
 
   /// Delete a session
   Future<void> deleteSession(String sessionId) async {
-    final sessions = _box.values
-        .where((s) => s.sessionId == sessionId)
-        .toList();
-    if (sessions.isNotEmpty) {
-      await sessions.first.delete();
+    final key = _box.keys.firstWhere(
+      (k) => _box.get(k)?.sessionId == sessionId,
+      orElse: () => null,
+    );
+    if (key != null) {
+      await _box.delete(key);
     }
   }
 

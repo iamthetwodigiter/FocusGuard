@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:focusguard/core/theme/app_theme.dart';
+import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DeveloperScreen extends StatelessWidget {
@@ -16,105 +17,136 @@ class DeveloperScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        title: const Text(
-          'Developer',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 20),
-            // Profile Image / Avatar Placeholder
-            Container(
-              width: 120,
-              height: 120,
+      body: Stack(
+        children: [
+          // Background accents
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
+                color: AppColors.accent.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [AppColors.accent, AppColors.accentSecondary],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.accent.withValues(alpha: 0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.person_rounded,
-                size: 60,
-                color: Colors.white,
               ),
             ),
-            const SizedBox(height: 32),
-            const Text(
-              'thetwodigiter',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-                color: AppColors.text,
-                letterSpacing: -1,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Flutter Developer',
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.textDim.withValues(alpha: 0.7),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 40),
-            _buildAboutCard(),
-            const SizedBox(height: 24),
-            _buildPortfolioCard(),
-            const SizedBox(height: 40),
-            const Text(
-              'Connect with me',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.text,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          ),
+          SafeArea(
+            child: Column(
               children: [
-                _buildSocialIcon(
-                  Icons.language_rounded,
-                  'Website',
-                  () => _launchUrl('https://www.thetwodigiter.app'),
-                ),
-                const SizedBox(width: 20),
-                _buildSocialIcon(
-                  Icons.code_rounded,
-                  'GitHub',
-                  () => _launchUrl('https://github.com/iamthetwodigiter'),
+                _buildAppBar(context),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          width: 250,
+                          child: LottieBuilder.asset('assets/dev.json'),
+                        ),
+                        const SizedBox(height: 32),
+                        const Text(
+                          'thetwodigiter',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.text,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Flutter Developer',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.textDim.withValues(alpha: 0.7),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                        _buildAboutCard(),
+                        const SizedBox(height: 24),
+                        _buildPortfolioCard(),
+                        const SizedBox(height: 40),
+                        const Text(
+                          'Connect with me',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.text,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildSocialIcon(
+                              Icons.language_rounded,
+                              'Website',
+                              () => _launchUrl('https://www.thetwodigiter.app'),
+                            ),
+                            const SizedBox(width: 20),
+                            _buildSocialIcon(
+                              Icons.code_rounded,
+                              'GitHub',
+                              () => _launchUrl(
+                                'https://github.com/iamthetwodigiter',
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 60),
+                        Text(
+                          '© 2026 FocusGuard by thetwodigiter',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textDim.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        const SizedBox(height: 48),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 60),
-            Text(
-              '© 2026 FocusGuard by thetwodigiter',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textDim.withValues(alpha: 0.5),
-              ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: AppColors.text,
+              size: 20,
             ),
-          ],
-        ),
+            style: IconButton.styleFrom(
+              backgroundColor: AppColors.surface,
+              padding: const EdgeInsets.all(12),
+            ),
+          ),
+          const SizedBox(width: 16),
+          const Text(
+            'Developer',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: AppColors.text,
+              letterSpacing: -1,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -207,7 +239,7 @@ class DeveloperScreen extends StatelessWidget {
           const SizedBox(height: 8),
           OutlinedButton(
             style: OutlinedButton.styleFrom(
-              textStyle: TextStyle(color: AppColors.text),
+              textStyle: const TextStyle(color: AppColors.text),
               side: BorderSide(color: AppColors.accent.withValues(alpha: 0.6)),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),

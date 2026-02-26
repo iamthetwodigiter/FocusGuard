@@ -18,6 +18,7 @@ class HiveService {
     await Hive.openBox<Achievement>(AppConstants.achievementsBox);
     await Hive.openBox<WebsiteInfo>(AppConstants.websitesBox);
     await Hive.openBox<BlockedAppStat>(AppConstants.blockedAppStatsBox);
+    await Hive.openBox(AppConstants.routinesBox);
   }
 
   static Box getBox(String boxName) {

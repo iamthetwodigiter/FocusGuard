@@ -5,6 +5,7 @@ import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
 import android.content.Intent
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import android.util.Log
 
 class FocusGuardAccessibilityService : AccessibilityService() {
@@ -14,7 +15,10 @@ class FocusGuardAccessibilityService : AccessibilityService() {
     private var currentBlockedApp: String? = null
     private var blockedApps: Set<String> = emptySet()
     private var blockedBrowsers: Set<String> = emptySet()
+    private var blockedWebsites: Set<String> = emptySet()
     private var isSessionActive: Boolean = false
+    private var systemAppShield: Boolean = true // Renamed from blockSystemApps and default changed to true
+    private var blockSystemApps_DEPRECATED: Boolean = false // New variable as per instruction
 
     companion object {
         private const val TAG = "FocusGuardService"
@@ -22,34 +26,41 @@ class FocusGuardAccessibilityService : AccessibilityService() {
         private const val BLOCKED_APPS_KEY = "flutter.nativeBlockedApps"
         private const val BLOCKED_BROWSERS_KEY = "flutter.nativeBlockedBrowsers"
         private const val SESSION_ACTIVE_KEY = "flutter.nativeSessionActive"
-        private const val BLOCK_SYSTEM_APPS_KEY = "flutter.blockSystemApps"
+        private const val BLOCK_SYSTEM_APPS_KEY = "flutter.systemAppShield"
+        private const val BLOCKED_WEBSITES_KEY = "flutter.nativeBlockedWebsites"
         
-        // System packages that should NEVER be blocked
-        private val SYSTEM_WHITELIST = setOf(
-            // Core Android System
+        // Critical apps that can NEVER be blocked (Safety check to prevent lockout)
+        private val CRITICAL_SYSTEM_APPS = setOf(
             "com.android.systemui",
             "com.android.settings",
             "com.android.launcher",
             "com.android.launcher3",
             "com.android.phone",
             "com.android.dialer",
+            "android",
+            "com.google.android.gsf",
+            "com.google.android.gms",
+            "com.google.android.setupwizard",
+            // Device specific launchers
+            "com.samsung.android.oneui.home",
+            "com.miui.home",
+            "com.huawei.android.launcher",
+            "net.oneplus.launcher",
+            "com.oppo.launcher",
+            "com.vivo.launcher",
+            "com.realme.launcher",
+            "com.motorola.launcher3"
+        )
+
+        // System packages that are whitelisted by default but CAN be blocked if user toggles them
+        private val SYSTEM_WHITELIST = setOf(
             "com.android.contacts",
             "com.android.mtp",
             "com.android.providers",
             "com.android.emergency",
             "com.android.vending",           // Play Store
-            "android",
-            
-            // Google System Apps
-            "com.google.android.apps.nexuslauncher",
-            "com.google.android.dialer",
-            "com.google.android.contacts",
-            "com.google.android.gsf",
-            "com.google.android.gms",
-            "com.google.android.setupwizard",
             
             // Samsung
-            "com.samsung.android.oneui.home",      // OneUI Launcher
             "com.samsung.android.app.launcher",
             "com.sec.android.app.launcher",
             "com.samsung.android.dialer",
@@ -63,7 +74,6 @@ class FocusGuardAccessibilityService : AccessibilityService() {
             "com.samsung.android.emergencymode",
             
             // Xiaomi / MIUI
-            "com.miui.home",                       // MIUI Launcher
             "com.mi.android.globallauncher",
             "com.android.thememanager",
             "com.miui.securitycenter",
@@ -75,7 +85,6 @@ class FocusGuardAccessibilityService : AccessibilityService() {
             "com.miui.securityadd",
             
             // Huawei / EMUI
-            "com.huawei.android.launcher",
             "com.huawei.systemmanager",
             "com.huawei.android.thememanager",
             "com.huawei.phoneservice",
@@ -84,30 +93,25 @@ class FocusGuardAccessibilityService : AccessibilityService() {
             "com.huawei.himovie",
             
             // OnePlus / OxygenOS
-            "net.oneplus.launcher",
             "net.oneplus.odm",
             "com.oneplus.security",
             "com.oneplus.account",
             "com.oneplus.backuprestore",
             
             // Oppo / ColorOS
-            "com.oppo.launcher",
             "com.coloros.safecenter",
             "com.coloros.gamespace",
             "com.oppo.contacts",
             
             // Vivo / FuntouchOS
-            "com.vivo.launcher",
             "com.iqoo.secure",
             "com.bbk.launcher2",
             "com.vivo.safecenter",
             
             // Realme
-            "com.realme.launcher",
             "com.coloros.phonenoareainquire",
             
             // Motorola
-            "com.motorola.launcher3",
             "com.motorola.setupwizard",
             
             // Nokia
@@ -129,7 +133,6 @@ class FocusGuardAccessibilityService : AccessibilityService() {
             "com.android.server.telecom",
             "com.qualcomm.qti",                    // Qualcomm services
             "com.mediatek",                        // MediaTek services
-            "com.android.vending",                 // Play Store
             
             // Critical Google Apps
             "com.google.android.apps.maps",
@@ -201,39 +204,103 @@ class FocusGuardAccessibilityService : AccessibilityService() {
             // Whitelist our own app to prevent infinite loop
             if (packageName == this.packageName) {
                 addLog("⚪ Ignoring own app")
-                Log.d(TAG, "Debug: Own app ignored")
-                return
-            }
-            
-            loadBlockedApps() // Reload blocked apps on each event to get latest data
-
-            // Check if it's a system app that should never be blocked
-            if (!blockSystemApps && isSystemApp(packageName)) {
-                addLog("⚪ Ignoring system app: $packageName")
-                Log.d(TAG, "Debug: System app ignored")
                 return
             }
 
-            // Always ignore core system packages from the whitelist regardless of setting
-            if (SYSTEM_WHITELIST.contains(packageName)) {
-                addLog("⚪ Ignoring core whitelist app: $packageName")
+            loadBlockedApps() // Reload blocked apps 
+            
+            // 1. SAFETY FIRST: Never block critical system components
+            if (CRITICAL_SYSTEM_APPS.contains(packageName)) {
+                addLog("⚪ Ignoring safety-critical app: $packageName")
                 return
             }
-            
-            val isBlocked = blockedApps.contains(packageName) || blockedBrowsers.contains(packageName)
-            val shouldBlock = isSessionActive && isBlocked
-            
-            addLog("[Session: ${if(isSessionActive) "🔴 ON" else "⚪ OFF"}] [Blocked: $isBlocked] Package: $packageName")
 
-            // Only block if session is active and package is in either blocked list
-            if (shouldBlock) {
-                val type = if (blockedBrowsers.contains(packageName)) "BROWSER" else "APP"
-                addLog("🚫 BLOCKING $type: $packageName")
-                Log.e(TAG, "BLOCKING $type: $packageName")
+            // 1.5 System App Protection (Shield)
+            if (systemAppShield && isSystemApp(packageName)) {
+                addLog("🛡️ Protecting system app (Shield is ON): $packageName")
+                return
+            }
+
+            val explicitlyBlocked = blockedApps.contains(packageName)
+            val isBrowser = blockedBrowsers.contains(packageName)
+            val shouldBlockApp = isSessionActive && explicitlyBlocked
+
+            // 2. If it is EXPLICITLY blocked by user in App Selection
+            if (shouldBlockApp) {
+                addLog("🚫 BLOCKING explicitly restricted app: $packageName")
                 blockApp(packageName)
-            } else {
-                Log.d(TAG, "Debug: Allowed $packageName")
+                return
             }
+
+            // 3. If it is a Browser, check for matching websites
+            if (isSessionActive && isBrowser) {
+                val rootNode = rootInActiveWindow
+                val currentUrl = extractUrl(rootNode, packageName)
+                if (currentUrl != null) {
+                    addLog("🌐 Browser detected ($packageName), checking URL: $currentUrl")
+                    if (isUrlBlocked(currentUrl)) {
+                        addLog("🚫 BLOCKING matching website: $currentUrl")
+                        blockApp(packageName)
+                        return
+                    }
+                }
+            }
+
+            if (SYSTEM_WHITELIST.contains(packageName)) {
+                addLog("⚪ Ignoring whitelisted component: $packageName")
+                return
+            }
+
+            addLog("[Session: ${if(isSessionActive) "🔴 ON" else "⚪ OFF"}] [Explicit: $explicitlyBlocked] [Browser: $isBrowser] Package: $packageName")
+        }
+    }
+
+    private fun extractUrl(rootNode: android.view.accessibility.AccessibilityNodeInfo?, packageName: String): String? {
+        if (rootNode == null) return null
+        
+        // Browser specific resource IDs for URL bars
+        val urlBarIds = mapOf(
+            "com.android.chrome" to "com.android.chrome:id/url_bar",
+            "org.mozilla.firefox" to "org.mozilla.firefox:id/url_bar_title",
+            "com.samsung.android.app.sbrowser" to "com.samsung.android.app.sbrowser:id/location_bar_edit_text"
+        )
+
+        // 1. Try by ID
+        urlBarIds[packageName]?.let { id ->
+            rootNode.findAccessibilityNodeInfosByViewId(id)?.firstOrNull()?.text?.toString()?.let { return it }
+        }
+
+        // 2. Generic search for suspicious nodes (common browser patterns)
+        val stack = mutableListOf(rootNode)
+        while (stack.isNotEmpty()) {
+            val node = stack.removeAt(stack.size - 1)
+            
+            // Look for nodes with text that looks like a URL or domain
+            val text = node.text?.toString() ?: ""
+            if (text.contains(".") && (text.startsWith("http") || !text.contains(" ") && text.length > 3)) {
+                // Heuristic: URL bars usually have specific roles or descriptions
+                if (node.className?.contains("EditText") == true || node.isEditable) {
+                    return text
+                }
+            }
+
+            for (i in 0 until node.childCount) {
+                node.getChild(i)?.let { stack.add(it) }
+            }
+        }
+        return null
+    }
+
+    private fun isUrlBlocked(url: String): Boolean {
+        val cleanUrl = url.lowercase().trim()
+        return blockedWebsites.any { blocked ->
+            val cleanBlocked = blocked.lowercase().trim()
+                .replace("https://", "")
+                .replace("http://", "")
+                .replace("www.", "")
+                .split("/")[0] // Just the domain
+            
+            cleanUrl.contains(cleanBlocked)
         }
     }
     
@@ -269,6 +336,7 @@ class FocusGuardAccessibilityService : AccessibilityService() {
             "android.",
             "com.google.android.gsf",
             "com.google.android.gms",
+            "com.google.android.setupwizard",
         )
         
         return systemPrefixes.any { packageName.startsWith(it) }
@@ -309,8 +377,12 @@ class FocusGuardAccessibilityService : AccessibilityService() {
         // Load session active status
         isSessionActive = prefs.getBoolean(SESSION_ACTIVE_KEY, false)
         
-        // Load block system apps preference
-        blockSystemApps = prefs.getBoolean(BLOCK_SYSTEM_APPS_KEY, false)
+        // Load system app shield preference
+        systemAppShield = prefs.getBoolean(BLOCK_SYSTEM_APPS_KEY, true)
+
+        // Load blocked websites list
+        val blockedWebsitesJson = prefs.getString(BLOCKED_WEBSITES_KEY, "[]") ?: "[]"
+        blockedWebsites = parseBlockedApps(blockedWebsitesJson)
         
         updateServiceNotification()
     }

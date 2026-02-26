@@ -25,47 +25,51 @@ class AchievementsScreen extends ConsumerWidget {
           ),
 
           SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                _buildSliverAppBar(),
-                badgesState.when(
-                  loading: () => const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  error: (e, _) => SliverFillRemaining(
-                    child: Center(child: Text('Error: $e')),
-                  ),
-                  data: (badges) {
-                    final unlockedCount = badges
-                        .where((b) => b.unlocked)
-                        .length;
-                    final total = badges.length;
-                    final progress = total > 0 ? unlockedCount / total : 0.0;
+            child: Column(
+              children: [
+                _buildAppBar(context),
+                Expanded(
+                  child: CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: [
+                      badgesState.when(
+                        loading: () => const SliverFillRemaining(
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                        error: (e, _) => SliverFillRemaining(
+                          child: Center(child: Text('Error: $e')),
+                        ),
+                        data: (badges) {
+                          final unlockedCount = badges.where((b) => b.unlocked).length;
+                          final total = badges.length;
+                          final progress = total > 0 ? unlockedCount / total : 0.0;
 
-                    return SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      sliver: SliverList(
-                        delegate: SliverChildListDelegate([
-                          const SizedBox(height: 24),
-                          _buildProgressHeader(
-                            unlockedCount,
-                            total,
-                            progress,
-                          ),
-                          const SizedBox(height: 40),
-                          _buildSectionTitle('Available Badges'),
-                          const SizedBox(height: 16),
-                          _buildBadgesGrid(context, badges),
-                          const SizedBox(height: 40),
-                          _buildSectionTitle('Active Tiers'),
-                          const SizedBox(height: 16),
-                          _buildTierCard(unlockedCount),
-                          const SizedBox(height: 120),
-                        ]),
+                          return SliverPadding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            sliver: SliverList(
+                              delegate: SliverChildListDelegate([
+                                const SizedBox(height: 12),
+                                _buildProgressHeader(
+                                  unlockedCount,
+                                  total,
+                                  progress,
+                                ),
+                                const SizedBox(height: 40),
+                                _buildSectionTitle('Available Badges'),
+                                const SizedBox(height: 16),
+                                _buildBadgesGrid(context, badges),
+                                const SizedBox(height: 40),
+                                _buildSectionTitle('Active Tiers'),
+                                const SizedBox(height: 16),
+                                _buildTierCard(unlockedCount),
+                                const SizedBox(height: 120),
+                              ]),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -83,22 +87,31 @@ class AchievementsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSliverAppBar() {
-    return const SliverAppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      expandedHeight: 80,
-      title: Text(
-        'Milestones',
-        style: TextStyle(
-          color: AppColors.text,
-          fontWeight: FontWeight.w900,
-          fontSize: 28,
-          letterSpacing: -1,
-        ),
+  Widget _buildAppBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.text, size: 20),
+            style: IconButton.styleFrom(
+              backgroundColor: AppColors.surface,
+              padding: const EdgeInsets.all(12),
+            ),
+          ),
+          const SizedBox(width: 16),
+          const Text(
+            'Milestones',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: AppColors.text,
+              letterSpacing: -1,
+            ),
+          ),
+        ],
       ),
-      floating: true,
-      centerTitle: false,
     );
   }
 
@@ -215,14 +228,10 @@ class AchievementsScreen extends ConsumerWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
-          color: badge.unlocked
-              ? accent.withValues(alpha: 0.08)
-              : AppColors.surface,
+          color: badge.unlocked ? accent.withValues(alpha: 0.08) : AppColors.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: badge.unlocked
-                ? accent.withValues(alpha: 0.3)
-                : Colors.white.withValues(alpha: 0.03),
+            color: badge.unlocked ? accent.withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.03),
             width: 1.5,
           ),
           boxShadow: [
@@ -241,9 +250,7 @@ class AchievementsScreen extends ConsumerWidget {
               badge.emoji,
               style: TextStyle(
                 fontSize: 36,
-                color: badge.unlocked
-                    ? null
-                    : Colors.grey.withValues(alpha: 0.4),
+                color: badge.unlocked ? null : Colors.grey.withValues(alpha: 0.4),
               ),
             ),
             const SizedBox(height: 8),
@@ -255,9 +262,7 @@ class AchievementsScreen extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
-                color: badge.unlocked
-                    ? AppColors.text
-                    : AppColors.textDim,
+                color: badge.unlocked ? AppColors.text : AppColors.textDim,
               ),
             ),
           ],

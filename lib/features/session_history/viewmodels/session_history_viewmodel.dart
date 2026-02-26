@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../../../core/constants/app_constants.dart';
 import '../models/focus_session.dart';
 import '../repositories/session_history_repository.dart';
 
@@ -26,12 +28,14 @@ class SessionHistoryNotifier extends StateNotifier<AsyncValue<List<FocusSession>
   }
 
   Future<void> addSession(FocusSession session) async {
+    // Save to Hive
+    final box = Hive.box<FocusSession>(AppConstants.sessionsBox);
+    await box.add(session);
+    
+    // Update state to include the new session
     state.whenData((sessions) {
       state = AsyncValue.data([session, ...sessions]);
     });
-    // Session is already added to Hive in Repository.startSession, 
-    // but if it's a finished session being added manually:
-    // Actually the logic in Repository is better.
   }
 
   Future<void> deleteSession(String sessionId) async {

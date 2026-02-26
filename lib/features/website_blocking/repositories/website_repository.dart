@@ -126,7 +126,12 @@ class WebsiteRepository {
     debugPrint('   Browser list: $browsersToBlock');
     
     await AndroidServiceBridge.syncBlockedBrowsers(browsersToBlock);
-    debugPrint('✅ Browser sync complete');
+    
+    // Sync actual URLs for selective blocking
+    final List<String> urls = blockedWebsites.map((w) => w.url).toList();
+    await AndroidServiceBridge.syncBlockedWebsites(urls);
+    
+    debugPrint('✅ Browser and URL sync complete');
   }
 
   static List<String> get browserPackages => _browserPackages;

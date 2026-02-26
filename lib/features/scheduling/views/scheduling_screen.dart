@@ -180,7 +180,7 @@ class _SchedulingScreenState extends ConsumerState<SchedulingScreen> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        '$count active',
+        '$count total',
         style: const TextStyle(color: AppColors.textDim, fontSize: 11, fontWeight: FontWeight.bold),
       ),
     );
@@ -260,6 +260,16 @@ class _SchedulingScreenState extends ConsumerState<SchedulingScreen> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton.icon(
+                onPressed: () => _showRuleDialog(rule: rule),
+                icon: const Icon(Icons.edit_rounded, size: 16),
+                label: const Text('Edit'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.accent.withValues(alpha: 0.8),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              const SizedBox(width: 8),
+              TextButton.icon(
                 onPressed: () => ref.read(focusRulesProvider.notifier).deleteRule(rule.id),
                 icon: const Icon(Icons.delete_outline_rounded, size: 16),
                 label: const Text('Remove'),
@@ -291,7 +301,7 @@ class _SchedulingScreenState extends ConsumerState<SchedulingScreen> {
 
   Widget _buildFAB() {
     return FloatingActionButton.extended(
-      onPressed: _showAddRuleDialog,
+      onPressed: () => _showRuleDialog(),
       backgroundColor: AppColors.accent,
       foregroundColor: Colors.white,
       elevation: 4,
@@ -301,43 +311,255 @@ class _SchedulingScreenState extends ConsumerState<SchedulingScreen> {
     );
   }
 
-  void _showAddRuleDialog() {
-    // Keeping logic as provided
-    showDialog(
+  void _showRuleDialog({FocusRule? rule}) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('Add Focus Rule', style: TextStyle(color: AppColors.text, fontWeight: FontWeight.w800)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Create a new scheduled focus session', style: TextStyle(color: AppColors.textDim)),
-            const SizedBox(height: 16),
-            TextField(
-              style: const TextStyle(color: AppColors.text),
-              decoration: InputDecoration(
-                labelText: 'Rule Name',
-                labelStyle: const TextStyle(color: AppColors.textDim),
-                hintText: 'e.g., Morning Focus',
-                hintStyle: const TextStyle(color: Colors.white24),
-                filled: true,
-                fillColor: AppColors.bg.withValues(alpha: 0.5),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => RuleDialog(
+        rule: rule,
+        onSave: (newRule) {
+          if (rule == null) {
+            ref.read(focusRulesProvider.notifier).addRule(newRule);
+          } else {
+            ref.read(focusRulesProvider.notifier).updateRule(newRule);
+          }
+        },
+      ),
+    );
+  }
+}
+
+class RuleDialog extends StatefulWidget {
+  final FocusRule? rule;
+  final Function(FocusRule) onSave;
+
+  const RuleDialog({super.key, this.rule, required this.onSave});
+
+  @override
+  State<RuleDialog> createState() => _RuleDialogState();
+}
+
+class _RuleDialogState extends State<RuleDialog> {
+  late TextEditingController _nameController;
+  late TimeOfDay _startTime;
+  late TimeOfDay _endTime;
+  late Set<String> _selectedDays;
+
+  final List<String> _allDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.rule?.name ?? '');
+    _startTime = widget.rule?.startTime ?? const TimeOfDay(hour: 9, minute: 0);
+    _endTime = widget.rule?.endTime ?? const TimeOfDay(hour: 17, minute: 0);
+    _selectedDays = Set.from(widget.rule?.daysOfWeek ?? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _selectTime(bool isStart) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: isStart ? _startTime : _endTime,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: AppColors.accent,
+              onPrimary: Colors.white,
+              surface: AppColors.surface,
+              onSurface: AppColors.text,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        top: 24,
+        left: 24,
+        right: 24,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.rule == null ? 'New Routine' : 'Edit Routine',
+                style: const TextStyle(
+                  color: AppColors.text,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close_rounded, color: AppColors.textDim),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          TextFormField(
+            controller: _nameController,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter a routine name';
+              }
+              return null;
+            },
+            autovalidateMode: AutovalidateMode.always,
+            style: const TextStyle(color: AppColors.text, fontWeight: FontWeight.w600),
+            decoration: InputDecoration(
+              labelText: 'Routine Name',
+              labelStyle: const TextStyle(color: AppColors.textDim),
+              hintText: 'e.g., Deep Work',
+              hintStyle: const TextStyle(color: Colors.white24),
+              filled: true,
+              fillColor: AppColors.bg.withValues(alpha: 0.5),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+              prefixIcon: const Icon(Icons.edit_note_rounded, color: AppColors.accent),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Time Schedule',
+            style: TextStyle(color: AppColors.text, fontWeight: FontWeight.w800, fontSize: 14),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _buildTimeTile('Start', _startTime, () => _selectTime(true))),
+              const SizedBox(width: 16),
+              Expanded(child: _buildTimeTile('End', _endTime, () => _selectTime(false))),
+            ],
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Repeat Days',
+            style: TextStyle(color: AppColors.text, fontWeight: FontWeight.w800, fontSize: 14),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _allDays.map((day) {
+              final isSelected = _selectedDays.contains(day);
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    if (isSelected) {
+                      _selectedDays.remove(day);
+                    } else {
+                      _selectedDays.add(day);
+                    }
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.accent : AppColors.bg,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected ? AppColors.accent : AppColors.textDim.withValues(alpha: 0.1),
+                    ),
+                  ),
+                  child: Text(
+                    day,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : AppColors.textDim,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: () {
+                if (_nameController.text.isEmpty) return;
+                final rule = FocusRule(
+                  id: widget.rule?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+                  name: _nameController.text,
+                  startTime: _startTime,
+                  endTime: _endTime,
+                  daysOfWeek: _selectedDays.toList(),
+                  isEnabled: widget.rule?.isEnabled ?? true,
+                );
+                widget.onSave(rule);
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Save Routine',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
               ),
             ),
-            const SizedBox(height: 12),
-            const Text('Full management coming soon', style: TextStyle(color: AppColors.accent, fontSize: 12)),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent, foregroundColor: Colors.white),
-            child: const Text('Create'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTimeTile(String label, TimeOfDay time, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.bg.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.accent.withValues(alpha: 0.1)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: const TextStyle(color: AppColors.textDim, fontSize: 11, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(
+              time.format(context),
+              style: const TextStyle(color: AppColors.text, fontSize: 18, fontWeight: FontWeight.w900),
+            ),
+          ],
+        ),
       ),
     );
   }

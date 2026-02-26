@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodels/settings_viewmodel.dart';
 import 'package:focusguard/features/settings/presentation/screens/debug_logs_screen.dart';
+import 'package:focusguard/core/constants/app_constants.dart';
 import 'package:focusguard/core/theme/app_theme.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -67,12 +68,12 @@ class SettingsScreen extends ConsumerWidget {
                       _buildSettingsCard([
                         _buildSwitchTile(
                           context,
-                          'Shield System Apps',
-                          'Apply rules to system applications',
+                          'System App Shield',
+                          'Master protection for core components',
                           Icons.admin_panel_settings_rounded,
                           AppColors.success,
-                          settings['blockSystemApps'] ?? false,
-                          (val) => ref.read(settingsProvider.notifier).updateSetting('blockSystemApps', val),
+                          settings['systemAppShield'] ?? true,
+                          (val) => ref.read(settingsProvider.notifier).updateSetting('systemAppShield', val),
                         ),
                         _buildSwitchTile(
                           context,
@@ -114,7 +115,7 @@ class SettingsScreen extends ConsumerWidget {
                               style: TextStyle(color: AppColors.text, fontWeight: FontWeight.w800, fontSize: 14),
                             ),
                             Text(
-                              'Version 1.0.0 (Build 42)',
+                              'Version ${AppConstants.appVersion}',
                               style: TextStyle(color: AppColors.textDim.withValues(alpha: 0.5), fontSize: 12),
                             ),
                           ],

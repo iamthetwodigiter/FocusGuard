@@ -16,6 +16,7 @@ class StatisticsScreen extends ConsumerWidget {
     final totalFocusTime = ref.watch(totalFocusTimeProvider);
     final totalBlocks = ref.watch(totalBlocksStatProvider);
     final completedCount = ref.watch(completedSessionsCountProvider);
+    final peakStreak = ref.watch(peakFlowStreakProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -47,6 +48,7 @@ class StatisticsScreen extends ConsumerWidget {
                         totalFocusTime,
                         completedCount,
                         totalBlocks,
+                        peakStreak,
                       ),
                       const SizedBox(height: 40),
                       _buildSectionTitle('Weekly Performance'),
@@ -128,6 +130,7 @@ class StatisticsScreen extends ConsumerWidget {
     int time,
     int sessions,
     int blocks,
+    int peakStreak,
   ) {
     return Column(
       children: [
@@ -164,7 +167,7 @@ class StatisticsScreen extends ConsumerWidget {
                 ),
                 _buildMetricCard(
                   'Peak Flow',
-                  '5',
+                  '$peakStreak',
                   'days',
                   Icons.local_fire_department_rounded,
                   const Color(0xFFF43F5E),
@@ -239,11 +242,12 @@ class StatisticsScreen extends ConsumerWidget {
   }
 
   Widget _buildModernWeeklyChart(List<dynamic> sessions) {
-    final maxVal = sessions.isEmpty
-        ? 1
+    final maxValRaw = sessions.isEmpty
+        ? 0
         : sessions
-              .map((s) => s.durationMinutes as int)
+              .map((s) => (s.durationMinutes ?? 0) as int)
               .reduce((a, b) => a > b ? a : b);
+    final maxVal = maxValRaw == 0 ? 1 : maxValRaw;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -257,7 +261,7 @@ class StatisticsScreen extends ConsumerWidget {
       child: Column(
         children: [
           SizedBox(
-            height: 140,
+            height: 160,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,

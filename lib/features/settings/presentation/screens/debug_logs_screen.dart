@@ -1,8 +1,8 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:focusguard/services/logging_service.dart';
+import 'package:focusguard/core/theme/app_theme.dart';
 
 class DebugLogsScreen extends StatefulWidget {
   const DebugLogsScreen({super.key});
@@ -64,7 +64,13 @@ class _DebugLogsScreenState extends State<DebugLogsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Service Logs'), elevation: 0),
+      backgroundColor: AppColors.bg,
+      appBar: AppBar(
+        title: const Text('System Service Logs'),
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.text,
+        elevation: 0,
+      ),
       body: FutureBuilder<List<String>>(
         future: _logs,
         builder: (context, snapshot) {
@@ -142,7 +148,7 @@ class _DebugLogsScreenState extends State<DebugLogsScreen> {
                   itemBuilder: (context, index) {
                     final log = logs[index];
                     return Container(
-                      color: index.isEven ? Colors.grey[50] : Colors.white,
+                      color: index.isEven ? AppColors.surface.withValues(alpha: 0.3) : Colors.transparent,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
@@ -183,6 +189,6 @@ class _DebugLogsScreenState extends State<DebugLogsScreen> {
     if (log.contains('⚠')) return Colors.orange[700]!;
     if (log.contains('🔴')) return Colors.red;
     if (log.contains('🟢')) return Colors.green;
-    return Colors.grey[900]!;
+    return AppColors.text;
   }
 }

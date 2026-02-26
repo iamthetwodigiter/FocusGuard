@@ -1,6 +1,7 @@
 import 'package:installed_apps/installed_apps.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/system_whitelist.dart';
 import '../../../services/native_bridge/android_service_bridge.dart';
 import '../../../services/logging_service.dart';
 import '../models/app_info.dart';
@@ -37,13 +38,20 @@ class AppRepository {
       final blockedPackages = getBlockedPackageNames();
 
       final appList = apps.map((app) {
+        final isSystem = SystemWhitelist.packageNames.contains(app.packageName) ||
+                         app.packageName.startsWith('com.android.') ||
+                         app.packageName.startsWith('android.');
         return AppInfo(
           packageName: app.packageName,
           appName: app.name,
           icon: app.icon,
           isBlocked: blockedPackages.contains(app.packageName),
+          isSystemApp: isSystem,
         );
-      }).where((app) => app.packageName.isNotEmpty).toList()
+      }).where((app) => 
+          app.packageName.isNotEmpty && 
+          app.packageName != 'app.thetwodigiter.focusguard'
+      ).toList()
         ..sort((a, b) => a.appName.compareTo(b.appName));
       
       // Update cache

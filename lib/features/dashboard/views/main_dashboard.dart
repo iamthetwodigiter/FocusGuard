@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:focusguard/core/constants/app_constants.dart';
 import 'package:focusguard/features/focus_session/views/home_screen.dart';
 import 'package:focusguard/features/statistics/views/statistics_screen.dart';
 import 'package:focusguard/features/app_selection/views/app_selection_screen.dart';
@@ -11,15 +12,30 @@ import 'package:focusguard/features/achievements/views/achievements_screen.dart'
 import 'package:focusguard/features/settings/views/settings_screen.dart';
 import 'package:focusguard/features/developer/views/developer_screen.dart';
 import 'package:focusguard/core/theme/app_theme.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:focusguard/services/native_bridge/android_service_bridge.dart';
+import 'package:focusguard/services/routine_supervisor.dart';
 
 final currentTabProvider = StateProvider<int>((ref) => 0);
 
-class MainDashboard extends ConsumerWidget {
+class MainDashboard extends ConsumerStatefulWidget {
   const MainDashboard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MainDashboard> createState() => _MainDashboardState();
+}
+
+class _MainDashboardState extends ConsumerState<MainDashboard> {
+  @override
+  void initState() {
+    super.initState();
+    // Start the routine supervisor
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(routineSupervisorProvider).start();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentTab = ref.watch(currentTabProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -60,17 +76,17 @@ class MainDashboard extends ConsumerWidget {
       actions: [
         IconButton(
           onPressed: () async {
-            await Permission.notification.request();
+            await AndroidServiceBridge.exitApp();
           },
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha: 0.1),
+              color: AppColors.error.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.notifications_none_rounded,
-              color: AppColors.accent,
+              Icons.power_settings_new_rounded,
+              color: AppColors.error,
               size: 20,
             ),
           ),
@@ -92,7 +108,7 @@ class MainDashboard extends ConsumerWidget {
       ),
       child: Column(
         children: [
-          _buildDrawerHeader(),
+          _buildDrawerHeader(context),
           const SizedBox(height: 20),
           Expanded(
             child: ListView(
@@ -160,23 +176,23 @@ class MainDashboard extends ConsumerWidget {
                     );
                   },
                 ),
-                const Padding(
-                  padding: EdgeInsets.all(5),
-                  child: Divider(color: Colors.white10),
-                ),
-                _buildDrawerItem(
-                  context,
-                  Icons.settings_rounded,
-                  'Preferences',
-                  'App settings and privacy',
-                  () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                    );
-                  },
-                ),
+                // const Padding(
+                //   padding: EdgeInsets.all(5),
+                //   child: Divider(color: Colors.white10),
+                // ),
+                // _buildDrawerItem(
+                //   context,
+                //   Icons.settings_rounded,
+                //   'Preferences',
+                //   'App settings and privacy',
+                //   () {
+                //     Navigator.pop(context);
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                //     );
+                //   },
+                // ),
                 _buildDrawerSection('About'),
                 _buildDrawerItem(
                   context,
@@ -187,7 +203,9 @@ class MainDashboard extends ConsumerWidget {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const DeveloperScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const DeveloperScreen(),
+                      ),
                     );
                   },
                 ),
@@ -200,10 +218,10 @@ class MainDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildDrawerHeader() {
+  Widget _buildDrawerHeader(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(32, 80, 32, 40),
+      padding: const EdgeInsets.fromLTRB(32, 80, 32, 20),
       decoration: BoxDecoration(
         color: AppColors.surface.withValues(alpha: 0.5),
         borderRadius: const BorderRadius.only(bottomRight: Radius.circular(40)),
@@ -211,28 +229,53 @@ class MainDashboard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.accent, AppColors.accentSecondary],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.accent.withValues(alpha: 0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.accent, AppColors.accentSecondary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accent.withValues(alpha: 0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: const Icon(
-              Icons.shield_rounded,
-              color: Colors.white,
-              size: 32,
-            ),
+                child: const Icon(
+                  Icons.shield_rounded,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.settings,
+                    color: AppColors.accent,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
           const Text(
@@ -333,7 +376,7 @@ class MainDashboard extends ConsumerWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Text(
-              'v1.0.0',
+              AppConstants.appVersion,
               style: TextStyle(
                 color: AppColors.textDim,
                 fontSize: 10,

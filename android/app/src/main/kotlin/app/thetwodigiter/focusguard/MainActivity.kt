@@ -47,6 +47,10 @@ class MainActivity : FlutterActivity() {
                     setScreenshotBlocking(enabled)
                     result.success(null)
                 }
+                "exitApp" -> {
+                    exitApp()
+                    result.success(null)
+                }
                 else -> {
                     result.notImplemented()
                 }
@@ -122,6 +126,21 @@ class MainActivity : FlutterActivity() {
         } catch (e: Exception) {
             // Log to Android logs if service not available
             android.util.Log.d("MainActivity", "Could not add log to service: ${e.message}")
+        }
+    }
+
+    private fun exitApp() {
+        try {
+            // Kill activity
+            finishAffinity()
+            // Try to stop the accessibility service if possible (usually requires user action, but we can clear holder)
+            // Or just kill the process to be sure everything stops
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                android.os.Process.killProcess(android.os.Process.myPid())
+                System.exit(0)
+            }, 100)
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Error exiting app: ${e.message}")
         }
     }
 }
